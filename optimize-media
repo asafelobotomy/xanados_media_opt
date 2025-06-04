@@ -1,0 +1,63 @@
+#!/bin/bash
+
+LIB_DIR="$(dirname "$0")"
+source "$LIB_DIR/optimize-lib.sh"
+
+VERSION=$(<"$LIB_DIR/VERSION")
+
+show_help() {
+    cat <<EOF
+📼 optimize-media v$VERSION
+
+Usage: optimize-media <command> [options]
+
+Commands:
+  run         Launch interactive compression tool
+  dry-run     Preview files and generate a compressibility report
+  report      View latest dry-run report
+  version     Show current version
+  help        Show this help message
+EOF
+}
+
+show_version() {
+    echo "optimize-media v$VERSION"
+}
+
+run_optimizer() {
+    bash "$LIB_DIR/commands/interactive.sh"
+}
+
+run_dry_run() {
+    bash "$LIB_DIR/commands/dryrun.sh" --dry-run-report
+}
+
+view_report() {
+    local report="./dry_run_report.csv"
+    [[ -f "$report" ]] && cat "$report" || echo "❌ No report found."
+}
+
+check_dependencies
+
+case "$1" in
+    run|"")
+        run_optimizer
+        ;;
+    dry-run)
+        run_dry_run
+        ;;
+    report)
+        view_report
+        ;;
+    version)
+        show_version
+        ;;
+    help|--help|-h)
+        show_help
+        ;;
+    *)
+        echo "❌ Unknown command: $1"
+        show_help
+        exit 1
+        ;;
+esac
